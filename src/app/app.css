@@ -1,0 +1,6 @@
+.bg-card-radial {
+  background-image: radial-gradient(33% 50% at 15% 44%,
+  color-mix(in srgb, var(--rust) 20%, transparent), transparent), radial-gradient(33% 40% at 105% 42%,
+  color-mix(in srgb, var(--teal) 20%, transparent), transparent), radial-gradient(33% 80% at 85% 124%,
+  color-mix(in srgb, var(--teal) 20%, transparent), transparent), linear-gradient(to right, var(--charcoal), var(--charcoal));
+}

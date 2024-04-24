@@ -1,0 +1,1 @@
+export { AnimatedPenumbra } from './loader';
