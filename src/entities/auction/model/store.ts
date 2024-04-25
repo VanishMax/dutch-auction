@@ -13,6 +13,11 @@ const auctionStore = createStore<AuctionStore>()(persist((set) => ({
   myAuctions: [],
   createAuction: async () => {
     await sendMessage();
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 2000);
+    });
   },
 }), {
   name: 'dutch-auction-auction-store',

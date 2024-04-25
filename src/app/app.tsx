@@ -2,15 +2,11 @@ import type { FC } from 'react';
 import { LogoAnimation, Tabs, TabsList, Tab, TabPanel } from 'shared/ui';
 import { UserConnect } from 'features/connect-user';
 
-import { assets } from 'chain-registry/mainnet/osmosis';
-
 import './app.css';
 import { MyAuctionsList } from 'widgets/my-auctions-list';
 import { AuctionForm } from 'entities/auction';
 
 export const App: FC = () => {
-  console.log(assets);
-
   return (
     <main className="h-dvh flex flex-col gap-8 w-3/4 mx-auto py-8">
       <header className="relative z-10 rounded-lg shadow-sm overflow-hidden flex justify-between items-center p-5">

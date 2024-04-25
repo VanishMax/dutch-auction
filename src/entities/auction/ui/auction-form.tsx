@@ -1,14 +1,22 @@
 import { FC, FormEventHandler, useState } from 'react';
 
-import { BaseButton, Combobox } from 'shared/ui';
+import { BaseButton, NumberInput, Combobox, Slider, type Asset } from 'shared/ui';
 import { useAuctionStore } from 'entities/auction';
 
 import * as yup from 'yup';
 import { ValidationError } from 'yup';
 
 const validationSchema = yup.object({
-  denomination: yup.number().required().default(6),
-  amount: yup.number().required(),
+  sellToken: yup.string().required(),
+  receiveToken: yup.string().required().test('receive-token', 'Cannot be the same as the asset to sell', (value, context) => {
+    return value !== context.parent.sellToken;
+  }),
+  amount: yup.number().positive().required(),
+  startingPrice: yup.number().positive().required(),
+  reservePrice: yup.number().positive().required().test('reserve-price', 'Cannot be more than starting price', (value, context) => {
+    return value <= context.parent.startingPrice;
+  }),
+  auctionDuration: yup.number().required(),
 });
 type SchemaType = yup.InferType<typeof validationSchema>;
 
@@ -17,62 +25,105 @@ export const AuctionForm: FC = () => {
 
   const [loading, setLoading] = useState(false);
 
-  const [denomination, setDenomination] = useState<SchemaType['denomination']>(0);
   const [amount, setAmount] = useState<SchemaType['amount']>(0);
+  const [startingPrice, setStartingPrice] = useState<SchemaType['startingPrice']>(0);
+  const [reservePrice, setReservePrice] = useState<SchemaType['reservePrice']>(0);
+  const [auctionDuration, setAuctionDuration] = useState<SchemaType['auctionDuration']>(15);
+  const [sellToken, setSellToken] = useState<Asset>();
+  const [receiveToken, setReceiveToken] = useState<Asset>();
+
+  const [errors, setErrors] = useState<Partial<Record<keyof SchemaType, string>>>({});
+
+  const clearForm = () => {
+    setAmount(0);
+    setStartingPrice(0);
+    setReservePrice(0);
+    setAuctionDuration(15);
+  };
 
   const onSubmit: FormEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault();
 
     try {
+      setErrors({});
+
       const value: Partial<SchemaType> = {
+        sellToken: sellToken?.symbol,
+        receiveToken: receiveToken?.symbol,
         amount,
-        denomination,
+        startingPrice,
+        reservePrice,
+        auctionDuration,
       };
-      const res = await validationSchema.validate(value, { abortEarly: false });
-      console.log(res);
 
       setLoading(true);
+      await validationSchema.validate(value, { abortEarly: false });
       await createAuction();
+      clearForm();
+
       setLoading(false);
     } catch (error) {
       if (error instanceof ValidationError) {
-        console.error(error.errors);
+        setErrors(error.inner.reduce((acc, err) => ({ ...acc, [err.path as string]: err.message }), {}));
       }
+      setLoading(false);
     }
   };
 
   return (
     <form className="flex flex-col gap-8" onSubmit={onSubmit}>
-      <div className="flex gap-4 items-center justify-between">
-        <Combobox label="Asset to sell" className="flex-grow" />
-        <Combobox label="Asset to receive" className="flex-grow" />
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <label htmlFor="denomination-input" className="text-gray-200 text-sm">Denomination</label>
-        <input
-          id="denomination-input"
-          type="number"
-          placeholder=""
-          className="rounded-lg px-4 font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-teal/80 h-9 w-full transition-all bg-black/50 text-muted-foreground"
-          value={denomination}
-          onInput={(event) => setDenomination(parseInt(event.currentTarget.value))}
+      <fieldset className="flex gap-4 items-center justify-between">
+        <Combobox
+          error={errors.sellToken}
+          label="Asset to sell"
+          className="flex-grow"
+          onChange={setSellToken}
         />
-      </div>
+        <Combobox
+          error={errors.receiveToken}
+          label="Asset to receive"
+          className="flex-grow"
+          onChange={setReceiveToken}
+        />
+      </fieldset>
 
-      <div className="flex flex-col gap-1">
-        <label htmlFor="amount-input" className="text-gray-200 text-sm">Amount</label>
-        <input
-          id="amount-input"
-          type="number"
-          placeholder="Amount"
-          className="rounded-lg px-4 font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-teal/80 h-9 w-full transition-all bg-black/50 text-muted-foreground"
+      <fieldset className="flex gap-4 items-center justify-between">
+        <NumberInput
+          className="flex-grow"
+          label="Amount"
           value={amount}
-          onInput={(event) => setAmount(parseInt(event.currentTarget.value))}
+          error={errors.amount}
+          onChange={setAmount}
         />
-      </div>
+        <NumberInput
+          className="flex-grow"
+          label="Starting price"
+          value={startingPrice}
+          error={errors.startingPrice}
+          onChange={setStartingPrice}
+        />
+        <NumberInput
+          className="flex-grow"
+          label="Reserve price"
+          value={reservePrice}
+          error={errors.reservePrice}
+          onChange={setReservePrice}
+        />
+      </fieldset>
 
-      <BaseButton submit loading={loading}>Submit</BaseButton>
+      <fieldset className="flex gap-4 items-center justify-center">
+        <Slider
+          className="w-80"
+          label="Select auction duration"
+          value={auctionDuration}
+          minValue={15}
+          maxValue={2880}
+          step={15}
+          onChange={(values) => setAuctionDuration(values as number)}
+        />
+      </fieldset>
+
+      <BaseButton className="w-40 ml-auto" submit loading={loading}>Submit</BaseButton>
     </form>
 );
 };
