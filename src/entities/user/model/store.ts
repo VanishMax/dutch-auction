@@ -1,7 +1,9 @@
 import { createStore, useStore } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { userSignOut, userSignIn } from '../api';
 import type { User } from './types';
+import './bigint-polyfill';
 
 interface UserStore {
   user: User | undefined;
@@ -10,7 +12,7 @@ interface UserStore {
   signOut: () => Promise<void>;
 }
 
-const userStore = createStore<UserStore>()((set) => ({
+const userStore = createStore<UserStore>()(persist((set) => ({
   user: undefined,
   loading: false,
   signIn: async () => {
@@ -22,6 +24,30 @@ const userStore = createStore<UserStore>()((set) => ({
     set({ loading: true });
     await userSignOut();
     set({ user: undefined, loading: false });
+  },
+}), {
+  name: 'dutch-auction-user-store',
+  partialize: (state) => ({ user: state.user }),
+  storage: {
+    ...createJSONStorage(() => localStorage)!,
+    getItem: (name) => {
+      let state: { state?: UserStore };
+      try {
+        state = JSON.parse(localStorage.getItem(name) || '') as { state: UserStore };
+      } catch (_) {
+        state = {};
+      }
+
+      return {
+        version: 0,
+        state: state.state?.user ? {
+          user: {
+            ...state.state.user,
+            balance: BigInt(state.state.user.balance),
+          },
+        } : {},
+      };
+    },
   },
 }));
 

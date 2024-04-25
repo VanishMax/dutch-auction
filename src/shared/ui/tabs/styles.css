@@ -1,0 +1,7 @@
+.tab[aria-selected="true"] {
+  background-color: var(--teal);
+}
+
+.tab[aria-selected="false"] {
+  color: hsl(var(--muted-foreground));
+}
