@@ -7,7 +7,7 @@ import {
 } from './animation-logic';
 
 // React component version of animated-penumbra.svg
-export const AnimatedPenumbra = ({ className }: { className?: string }) => {
+export const LogoAnimation = ({ className }: { className?: string }) => {
   useEffect(() => {
     const coordinateCentrePoint = extractViewBoxDimensions();
     const noiseIntensityFactor = coordinateCentrePoint * 0.0014;

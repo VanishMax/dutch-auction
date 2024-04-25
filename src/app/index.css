@@ -53,4 +53,5 @@ body {
   font-weight: 400;
   line-height: 22px;
   color: hsl(var(--muted));
+  overflow: hidden;
 }

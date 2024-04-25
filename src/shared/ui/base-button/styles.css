@@ -1,0 +1,3 @@
+.bg-button-gradient-secondary {
+  background-image: linear-gradient(90deg, var(--teal-420) 0%, var(--sand-420) 50%, var(--rust-420) 100%);
+}
