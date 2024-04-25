@@ -4,3 +4,5 @@ export { BaseButton, type BaseButtonProps } from './base-button';
 
 export { Tab, TabsList } from './tabs';
 export { Tabs, TabPanel } from 'react-aria-components';
+
+export { Combobox, type ComboboxProps } from './combobox';

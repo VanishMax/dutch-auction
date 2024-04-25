@@ -1,6 +1,6 @@
 import { FC, FormEventHandler, useState } from 'react';
 
-import { BaseButton } from 'shared/ui';
+import { BaseButton, Combobox } from 'shared/ui';
 import { useAuctionStore } from 'entities/auction';
 
 import * as yup from 'yup';
@@ -43,19 +43,36 @@ export const AuctionForm: FC = () => {
 
   return (
     <form className="flex flex-col gap-8" onSubmit={onSubmit}>
-      <input
-        type="number"
-        placeholder="Denomination"
-        value={denomination}
-        onInput={(event) => setDenomination(parseInt(event.currentTarget.value))}
-      />
-      <input
-        type="number"
-        placeholder="Amount"
-        value={amount}
-        onInput={(event) => setAmount(parseInt(event.currentTarget.value))}
-      />
+      <div className="flex gap-4 items-center justify-between">
+        <Combobox label="Asset to sell" className="flex-grow" />
+        <Combobox label="Asset to receive" className="flex-grow" />
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label htmlFor="denomination-input" className="text-gray-200 text-sm">Denomination</label>
+        <input
+          id="denomination-input"
+          type="number"
+          placeholder=""
+          className="rounded-lg px-4 font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-teal/80 h-9 w-full transition-all bg-black/50 text-muted-foreground"
+          value={denomination}
+          onInput={(event) => setDenomination(parseInt(event.currentTarget.value))}
+        />
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label htmlFor="amount-input" className="text-gray-200 text-sm">Amount</label>
+        <input
+          id="amount-input"
+          type="number"
+          placeholder="Amount"
+          className="rounded-lg px-4 font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-teal/80 h-9 w-full transition-all bg-black/50 text-muted-foreground"
+          value={amount}
+          onInput={(event) => setAmount(parseInt(event.currentTarget.value))}
+        />
+      </div>
+
       <BaseButton submit loading={loading}>Submit</BaseButton>
     </form>
-  );
+);
 };
