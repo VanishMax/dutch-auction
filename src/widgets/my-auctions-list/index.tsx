@@ -1,10 +1,11 @@
 import { FC, useMemo } from 'react';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 
-import { Auction, AuctionCard, useAuctionStore } from 'entities/auction';
+import { Auction, useAuctionStore } from 'entities/auction';
 import { HelperInfo } from 'widgets/helper-info';
 import { useUserStore } from 'entities/user';
 import { useTime } from 'shared/utils/use-time';
+import { CardGroup } from 'widgets/my-auctions-list/card-group.tsx';
 
 export const MyAuctionsList: FC = () => {
   const auctions = useAuctionStore((state) => state.myAuctions);
@@ -36,30 +37,9 @@ export const MyAuctionsList: FC = () => {
 
   return (
     <div ref={parent} className="flex flex-col gap-5">
-      {!!current.length && (
-        <div className="flex flex-col gap-2">
-          <h2 className="bg-text-linear bg-clip-text text-xl font-semibold leading-[30px] text-transparent md:text-2xl md:font-bold md:leading-9">Current auctions</h2>
-          {current.map((auction) => (
-            <AuctionCard auction={auction} key={auction.sellToken + auction.startTime.toString()} isActive />
-          ))}
-        </div>
-      )}
-      {!!queued.length && (
-        <div className="flex flex-col gap-2">
-          <h2 className="bg-text-linear bg-clip-text text-transparent text-xl font-semibold leading-[30px] md:text-2xl md:font-bold md:leading-9">Queued auctions</h2>
-          {queued.map((auction) => (
-            <AuctionCard auction={auction} key={auction.sellToken + auction.startTime.toString()} />
-          ))}
-        </div>
-      )}
-      {!!passed.length && (
-        <div className="flex flex-col gap-2">
-          <h2 className="bg-text-linear bg-clip-text text-transparent text-xl font-semibold leading-[30px] md:text-2xl md:font-bold md:leading-9">Passed auctions</h2>
-          {passed.map((auction) => (
-            <AuctionCard auction={auction} key={auction.sellToken + auction.startTime.toString()} isPassed />
-          ))}
-        </div>
-      )}
+      <CardGroup auctions={current} title="Current auctions" isActive />
+      <CardGroup auctions={queued} title="Queued auctions" isActive />
+      <CardGroup auctions={passed} title="Ended auctions" isPassed />
     </div>
   );
 };

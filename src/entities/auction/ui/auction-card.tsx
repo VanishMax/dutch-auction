@@ -34,7 +34,11 @@ export const AuctionCard: FC<AuctionCardProps> = ({ auction, isActive, isPassed 
     }
 
     const hours = Math.floor(minutes / 60);
-    return ` (${hours} hours ${minutes % 60} minutes left)`;
+    if (hours < 24) {
+      return ` (${hours} hours ${minutes % 60} minutes left)`;
+    }
+
+    return '';
   };
 
   const onCancel = () => {
