@@ -1,14 +1,17 @@
 import type { FC } from 'react';
-import type { Auction } from '../model';
+import { Auction, useAuctionStore } from '../model';
 import clsx from 'clsx';
 import { useTime } from 'shared/utils/use-time.ts';
+import { BaseButton } from 'shared/ui';
 
 export interface AuctionCardProps {
   auction: Auction;
   isActive?: boolean;
+  isPassed?: boolean;
 }
 
-export const AuctionCard: FC<AuctionCardProps> = ({ auction, isActive }) => {
+export const AuctionCard: FC<AuctionCardProps> = ({ auction, isActive, isPassed }) => {
+  const cancelAuction = useAuctionStore((state) => state.cancelAuction);
   const time = useTime();
 
   const formatTime = (date: Date) => {
@@ -32,6 +35,10 @@ export const AuctionCard: FC<AuctionCardProps> = ({ auction, isActive }) => {
 
     const hours = Math.floor(minutes / 60);
     return ` (${hours} hours ${minutes % 60} minutes left)`;
+  };
+
+  const onCancel = () => {
+    cancelAuction(auction.sellToken, auction.startTime);
   };
 
   return (
@@ -62,6 +69,16 @@ export const AuctionCard: FC<AuctionCardProps> = ({ auction, isActive }) => {
         <p className="font-bold text-xs text-gray-300">End time</p>
         <p className="">{formatTime(auction.endTime)}{timeDistance(auction.endTime)}</p>
       </div>
+
+      {!isPassed ? (
+        <BaseButton className="ml-auto" onClick={onCancel}>
+          Cancel
+        </BaseButton>
+      ) : (
+        <BaseButton className="ml-auto" onClick={onCancel}>
+          Claim
+        </BaseButton>
+      )}
     </div>
   );
 };

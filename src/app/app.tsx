@@ -29,7 +29,7 @@ export const App: FC = () => {
         onSelectionChange={(tab) => setActiveTab(tab as AppTabs)}
       >
         {!!user && (
-          <TabsList aria-label="Dutch auction" className="sticky top-0">
+          <TabsList aria-label="Dutch auction" className="sticky z-10 top-0">
             <Tab id={AppTabs.MyAuctions}>My auctions</Tab>
             <Tab id={AppTabs.NewAuction}>New auction</Tab>
           </TabsList>

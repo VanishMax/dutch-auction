@@ -7,6 +7,7 @@ import { sendMessage } from '../api';
 interface AuctionStore {
   myAuctions: Auction[];
   createAuction: (auctions: Auction[]) => Promise<void>;
+  cancelAuction: (symbol: string, startTime: Date) => void;
 }
 
 const auctionStore = createStore<AuctionStore>()(persist((set) => ({
@@ -20,6 +21,11 @@ const auctionStore = createStore<AuctionStore>()(persist((set) => ({
         resolve();
       }, 2000);
     });
+  },
+  cancelAuction: (symbol, startTime) => {
+    set((state) => ({
+      myAuctions: state.myAuctions.filter((auction) => auction.sellToken !== symbol || auction.startTime !== startTime)
+    }));
   },
 }), {
   name: 'dutch-auction-auction-store',
@@ -39,6 +45,8 @@ const auctionStore = createStore<AuctionStore>()(persist((set) => ({
         state: state.state?.myAuctions ? {
           myAuctions: state.state.myAuctions.map((auction: Auction) => ({
             ...auction,
+            startTime: new Date(auction.startTime),
+            endTime: new Date(auction.endTime),
             amount: BigInt(auction.amount),
             initialPrice: BigInt(auction.startingPrice),
             reservePrice: BigInt(auction.reservePrice),

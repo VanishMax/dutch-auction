@@ -1,4 +1,6 @@
 import { FC, useMemo } from 'react';
+import { useAutoAnimate } from '@formkit/auto-animate/react';
+
 import { Auction, AuctionCard, useAuctionStore } from 'entities/auction';
 import { HelperInfo } from 'widgets/helper-info';
 import { useUserStore } from 'entities/user';
@@ -7,6 +9,7 @@ import { useTime } from 'shared/utils/use-time';
 export const MyAuctionsList: FC = () => {
   const auctions = useAuctionStore((state) => state.myAuctions);
   const user = useUserStore((state) => state.user);
+  const [parent] = useAutoAnimate();
 
   const time = useTime();
 
@@ -32,7 +35,7 @@ export const MyAuctionsList: FC = () => {
   }
 
   return (
-    <div className="flex flex-col gap-5">
+    <div ref={parent} className="flex flex-col gap-5">
       {!!current.length && (
         <div className="flex flex-col gap-2">
           <h2 className="bg-text-linear bg-clip-text text-xl font-semibold leading-[30px] text-transparent md:text-2xl md:font-bold md:leading-9">Current auctions</h2>
@@ -53,7 +56,7 @@ export const MyAuctionsList: FC = () => {
         <div className="flex flex-col gap-2">
           <h2 className="bg-text-linear bg-clip-text text-transparent text-xl font-semibold leading-[30px] md:text-2xl md:font-bold md:leading-9">Passed auctions</h2>
           {passed.map((auction) => (
-            <AuctionCard auction={auction} key={auction.sellToken + auction.startTime.toString()}/>
+            <AuctionCard auction={auction} key={auction.sellToken + auction.startTime.toString()} isPassed />
           ))}
         </div>
       )}
