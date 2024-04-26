@@ -1,8 +1,9 @@
 export interface Auction {
+  sellToken: string,
+  receiveToken: string,
   amount: bigint;
-  denomination: number;
-  asset: string;
-  initialPrice: bigint;
+  startingPrice: bigint;
   reservePrice: bigint;
-  period: number; // in minutes
+  startTime: Date;
+  endTime: Date;
 }

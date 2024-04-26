@@ -17,7 +17,7 @@ export const NumberInput: FC<NumberInputProps> = ({ label, error, className, ...
           error && 'ring-amber-500 ring-2'
         )}
       />
-      {error && <span className="absolute -bottom-6 text-sm text-amber-500">{error}</span>}
+      {error && <span className="absolute top-[64px] text-sm text-amber-500">{error}</span>}
     </NumberField>
   );
 };

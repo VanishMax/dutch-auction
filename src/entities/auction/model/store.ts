@@ -6,15 +6,17 @@ import { sendMessage } from '../api';
 
 interface AuctionStore {
   myAuctions: Auction[];
-  createAuction: (auction?: Auction) => Promise<void>;
+  createAuction: (auctions: Auction[]) => Promise<void>;
 }
 
 const auctionStore = createStore<AuctionStore>()(persist((set) => ({
   myAuctions: [],
-  createAuction: async () => {
-    await sendMessage();
+  createAuction: async (auctions) => {
+    await Promise.all(auctions.map(async (auction) => sendMessage(auction)));
+
     return new Promise((resolve) => {
       setTimeout(() => {
+        set((state) => ({ myAuctions: [...state.myAuctions, ...auctions] }));
         resolve();
       }, 2000);
     });
@@ -38,7 +40,7 @@ const auctionStore = createStore<AuctionStore>()(persist((set) => ({
           myAuctions: state.state.myAuctions.map((auction: Auction) => ({
             ...auction,
             amount: BigInt(auction.amount),
-            initialPrice: BigInt(auction.initialPrice),
+            initialPrice: BigInt(auction.startingPrice),
             reservePrice: BigInt(auction.reservePrice),
           })),
         } : {},

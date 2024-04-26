@@ -1,7 +1,7 @@
 import { FC, FormEventHandler, useState } from 'react';
 
 import { BaseButton, NumberInput, Combobox, Slider, type Asset } from 'shared/ui';
-import { useAuctionStore } from 'entities/auction';
+import { useAuctionStore, Auction } from 'entities/auction';
 
 import * as yup from 'yup';
 import { ValidationError } from 'yup';
@@ -17,10 +17,11 @@ const validationSchema = yup.object({
     return value <= context.parent.startingPrice;
   }),
   auctionDuration: yup.number().required(),
+  auctionsAmount: yup.number().required(),
 });
 type SchemaType = yup.InferType<typeof validationSchema>;
 
-export const AuctionForm: FC = () => {
+export const AuctionForm: FC<{ onCreated?: VoidFunction }> = ({ onCreated }) => {
   const createAuction = useAuctionStore((state) => state.createAuction);
 
   const [loading, setLoading] = useState(false);
@@ -29,6 +30,7 @@ export const AuctionForm: FC = () => {
   const [startingPrice, setStartingPrice] = useState<SchemaType['startingPrice']>(0);
   const [reservePrice, setReservePrice] = useState<SchemaType['reservePrice']>(0);
   const [auctionDuration, setAuctionDuration] = useState<SchemaType['auctionDuration']>(15);
+  const [auctionsAmount, setAuctionsAmount] = useState<SchemaType['auctionsAmount']>(1);
   const [sellToken, setSellToken] = useState<Asset>();
   const [receiveToken, setReceiveToken] = useState<Asset>();
 
@@ -39,6 +41,7 @@ export const AuctionForm: FC = () => {
     setStartingPrice(0);
     setReservePrice(0);
     setAuctionDuration(15);
+    setAuctionsAmount(1);
   };
 
   const onSubmit: FormEventHandler<HTMLFormElement> = async (event) => {
@@ -54,15 +57,28 @@ export const AuctionForm: FC = () => {
         startingPrice,
         reservePrice,
         auctionDuration,
+        auctionsAmount,
       };
 
       setLoading(true);
-      await validationSchema.validate(value, { abortEarly: false });
-      await createAuction();
-      clearForm();
+      const res = await validationSchema.validate(value, { abortEarly: false });
 
+      const newAuctions: Auction[] = Array.from({ length: auctionsAmount }, (_, index) => ({
+        sellToken: res.sellToken,
+        receiveToken: res.receiveToken,
+        amount: BigInt(res.amount),
+        startingPrice: BigInt(res.startingPrice),
+        reservePrice: BigInt(res.reservePrice),
+        startTime: new Date(Date.now() + res.auctionDuration * 60 * 1000 * index),
+        endTime: new Date(Date.now() + res.auctionDuration * 60 * 1000 * (index + 1)),
+      }));
+      await createAuction(newAuctions);
+
+      clearForm();
       setLoading(false);
+      onCreated?.();
     } catch (error) {
+      console.error('err', error);
       if (error instanceof ValidationError) {
         setErrors(error.inner.reduce((acc, err) => ({ ...acc, [err.path as string]: err.message }), {}));
       }
@@ -71,7 +87,7 @@ export const AuctionForm: FC = () => {
   };
 
   return (
-    <form className="flex flex-col gap-8" onSubmit={onSubmit}>
+    <form className="flex flex-col gap-10" onSubmit={onSubmit}>
       <fieldset className="flex gap-4 items-center justify-between">
         <Combobox
           error={errors.sellToken}
@@ -114,12 +130,22 @@ export const AuctionForm: FC = () => {
       <fieldset className="flex gap-4 items-center justify-center">
         <Slider
           className="w-80"
-          label="Select auction duration"
+          label="Auction duration"
+          isTime
           value={auctionDuration}
           minValue={15}
           maxValue={2880}
           step={15}
           onChange={(values) => setAuctionDuration(values as number)}
+        />
+        <Slider
+          className="w-80"
+          label="Amount of sequential auctions"
+          value={auctionsAmount}
+          minValue={1}
+          maxValue={10}
+          step={1}
+          onChange={(values) => setAuctionsAmount(values as number)}
         />
       </fieldset>
 

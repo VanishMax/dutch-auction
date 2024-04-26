@@ -4,9 +4,10 @@ import clsx from 'clsx';
 
 export interface SliderProps extends AriaSliderProps {
   label: string;
+  isTime?: boolean;
 }
 
-export const Slider: FC<SliderProps> = ({ label, className, ...props }) => {
+export const Slider: FC<SliderProps> = ({ label, isTime, className, ...props }) => {
   const renderDuration = (minutes: number) => {
     if (minutes < 60) {
       return `${minutes}m`;
@@ -21,11 +22,13 @@ export const Slider: FC<SliderProps> = ({ label, className, ...props }) => {
     <AriaSlider {...props} className={clsx('flex flex-col gap-1', className)}>
       <div className="flex w-full justify-between items-center">
         <Label className="text-gray-200 text-sm">{label}</Label>
-        <SliderOutput>
-          {(output) => (
-            <span className="text-gray-200 text-sm">{renderDuration(output.state.values?.[0])}</span>
-          )}
-        </SliderOutput>
+        {isTime ? (
+          <SliderOutput>
+            {(output) => (
+              <span className="text-gray-200 text-sm">{renderDuration(output.state.values?.[0])}</span>
+            )}
+          </SliderOutput>
+        ) : <SliderOutput />}
       </div>
 
       <SliderTrack className="relative w-full h-[6px] rounded-md bg-black/50">
